@@ -104,3 +104,54 @@ function()
                 explored.append(node)
                 if problem.isGoalState(node): return sequence
                 frontier.append(succNode)        
+
+#############################################################
+    def dfsExplore(succNode, successors, explored, frontier, solution):
+        node = succNode
+        explored.append(node)
+        print "Expanding node: ", node
+        print "solution type in dfsExplore: ", solution 
+
+            
+        if problem.isGoalState(node):
+            print "Node FoUnD!"
+            print "Frontier: ", frontier
+            solution = frontier
+            return solution
+
+        successors = problem.getSuccessors(node)
+
+        for action in successors:
+            succNode = action[0]
+
+            if succNode not in explored:
+                frontier.append(action)
+                solution = dfsExplore(succNode, successors, explored, frontier, solution)
+                frontier.pop()
+
+
+    explored = [] # Initiate explored list.
+    frontier = [] # Initiate frontier stack.
+    solution = []
+
+    node = problem.getStartState()
+    if problem.isGoalState(node): return # If starting node = goal then return true.
+    #frontier.append(node)
+    explored.append(node)
+
+
+    # Obtain initial successors from starting node
+    initSuccessors = problem.getSuccessors(node)
+    if len(initSuccessors) == 0: print "No initial successors."     # Return false if no successors found.
+
+    # Run DFS recursively for each initial path available. 
+    for initAction in initSuccessors:
+        initSuccNode = initAction[0]
+        
+        # Check if succNode is in explored list.
+        if initSuccNode not in explored:
+            frontier.append(initAction)
+            solution = dfsExplore(initSuccNode, initSuccessors, explored, frontier, solution)
+            frontier.pop()
+    
+    print "Solution: ", solution

@@ -87,62 +87,61 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    #util.raiseNotDefined()
+    
+    actions = []
 
-    def dfsExplore(succNode, successors, explored, frontier):
-        node = succNode
-        explored.append(node)
+    # Get Starting Node & return empty list if its the goal state.
+    node = problem.getStartState()
+    if problem.isGoalState(node): return []
+
+    node = (node, [])
+    frontier = util.Stack()
+    frontier.push(node)
+    print "frontier self: ", frontier.list
+
+    explored = util.Stack()
+    while not frontier.isEmpty():
+        #print "Frontier: ", frontier.reveal()
+        node, actions = frontier.pop()          # current node is the top node on frontier stack.
+        #print "node: ", node
 
         if problem.isGoalState(node):
-            print "Node FoUnD!"
-            print "Frontier: ", frontier
+            print "GOAL FOUND!"
+            break
 
-        successors = problem.getSuccessors(node)
-
-        for action in successors:
-            succNode = action[0]
-            succDirec = action[1]
-
-            if succNode not in explored:
-                frontier.append(succNode)
-                dfsExplore(succNode, successors, explored, frontier)
-                frontier.pop()
+        if node not in explored.list and node not in frontier.list:
+            explored.push(node)                # put node in explored
 
 
-    explored = [] # Initiate explored list.
-    frontier = [] # Initiate frontier stack.
+            for successor in problem.getSuccessors(node):
+                succNode = successor[0]
+                action = successor[1]
+                cost = successor[2]
 
-    node = problem.getStartState()
-    if problem.isGoalState(node): return # If starting node = goal then return true.
-    frontier.append(node)
-    explored.append(node)
+                if succNode not in explored.list:
+                    actions_to_node = actions + [action]
+                    a = (succNode, actions_to_node)
+                    frontier.push(a)
 
-
-    # Obtain initial successors from starting node
-    initSuccessors = problem.getSuccessors(node)
-    if len(initSuccessors) == 0: print "No initial successors."     # Return false if no successors found.
-
-    # Run DFS recursively for each initial path available. 
-    for initAction in initSuccessors:
-        succNode = initAction[0]
-        
-        # Check if succNode is in explored list.
-        if succNode not in explored:
-            frontier.append(succNode)
-            dfsExplore(succNode, initSuccessors, explored, frontier)
-            frontier.pop()
+    
+                    
+    print "ACTIONS SEQUENCE: ", actions
 
     from game import Directions
-    return [Directions.SOUTH]
 
-
-
-
-
-
+    actionSeq = []
+    for action in actions:
+        if action == "North":
+            actionSeq.append(Directions.NORTH)
+        elif action == "East":
+            actionSeq.append(Directions.EAST)
+        elif action == "West":
+            actionSeq.append(Directions.WEST)
+        else:
+            actionSeq.append(Directions.SOUTH)
     
+    return actionSeq
 
-    
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
