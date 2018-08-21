@@ -296,7 +296,8 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
         #util.raiseNotDefined()
-        return (self.startingPosition, list())
+        currentCorners = list()
+        return (self.startingPosition, currentCorners)
 
     def isGoalState(self, state):
         """
@@ -341,6 +342,7 @@ class CornersProblem(search.SearchProblem):
                 if nextNode in self.corners and nextNode not in currentCorners:     # Check if next node = corner
                                                                                     # Avoid open-system by checking if successorNode already in visitedCorners. 
                     nextCorners = currentCorners + [nextNode]
+
                 successors.append(((nextNode, nextCorners), action, 1))
 
 
@@ -378,6 +380,22 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+
+    succNode, currentCorners = state     # Unpack state elements.
+
+    hToCorners = list()
+    # Compute the manhattan distance to all goals from current node.
+    for corner in corners:
+        if corner not in currentCorners:
+            # Heuristic value = manhattan distance to closest goal.
+            mDist = abs(succNode[0] - corner[0]) + abs(succNode[1] - corner[1])
+            # Improving h: including the walls...
+            hToCorners.append(mDist)
+    
+    if len(hToCorners) > 0: 
+        h = min(hToCorners)       # heuristic value = distance to nearest goal.
+        return h
+
     return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
