@@ -390,6 +390,40 @@ def cornersHeuristic(state, problem):
             # Heuristic value = manhattan distance to closest goal.
             mDist = abs(succNode[0] - corner[0]) + abs(succNode[1] - corner[1])
             # Improving h: including the walls...
+            region = False                                                      # Determine relevant region for walls.
+            if corner[0] > succNode[0] and corner[1] > succNode[1]:
+                region = walls[succNode[0]:corner[0]][succNode[1]:corner[1]]
+            elif corner[0] > succNode[0] and corner[1] < succNode[1]:
+                region = walls[succNode[0]:corner[0]][corner[1]:succNode[1]]
+            elif corner[0] < succNode[0] and corner[1] > succNode[1]:
+                region = walls[corner[0]:succNode[0]][succNode[1]:corner[1]]
+            elif corner[0] < succNode[0] and corner[1] < succNode[1]:
+                region = walls[corner[0]:succNode[0]][corner[1]:succNode[1]]
+
+            xWall = list()                                         # Get wall y-axis within X_goal & X_pacman
+            if region != False:
+                #print "region: ", region
+                for wall_x in region:
+                    #print "wall_x: ", wall_x
+                    #xWall_x = len([1 for x in wall_x if x not in xWall and x == True])
+                    xWall_x = list()
+                    for x in wall_x:
+                        if x not in xWall and x == True:
+                            xWall_x.append(x)
+                    xWall.append(xWall_x)
+            
+            #print "xWall: ", xWall
+            if len(xWall) > 0:
+                xWall = len(max(xWall))
+            else:
+                xWall = 0
+
+            if xWall > (abs(succNode[1] - corner[1])):
+                #print "succNode: ", succNode
+                #print "Prev mDist: ", mDist
+                mDist += 2*abs(xWall - (abs(succNode[1] - corner[1])))
+                #print "Updated mDist: ", mDist
+
             hToCorners.append(mDist)
     
     if len(hToCorners) > 0: 

@@ -223,7 +223,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     accuActions = actions + [succAction]
                     accuCosts = costs + succCost
                     eval = accuCosts + heuristic(succNode, problem)
-                    #print "currentNode: ", currentNode, "succNode: ", succNode[0]
                     frontier.update((succNode, accuActions, accuCosts), eval)
 
     return [] # Return no actions as goal state is not found.
