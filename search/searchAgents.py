@@ -281,6 +281,8 @@ class CornersProblem(search.SearchProblem):
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
+        print "type(self.corners): ", type(self.corners)
+        print "Self.corners: ", self.corners
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
@@ -288,6 +290,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.visitedCorners = set()
 
     def getStartState(self):
         """
@@ -295,14 +298,29 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+        return self.startingPosition
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+        #corners = set(self.corners)
+        #if state not in self.visitedCorners:
+        #    if state in corners:
+        #        self.visitedCorners.add(state)
+        #        print "self.visitedCorners: ", self.visitedCorners
+
+        #isGoal = (self.visitedCorners == corners)
+        #print "isGoal: ", isGoal
+        
+        if state in self.corners:
+            isGoal = True
+        else:
+            isGoal = False
+        return isGoal
 
     def getSuccessors(self, state):
         """
@@ -325,6 +343,13 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x, y = state
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextState = (nextx, nexty)
+                successors.append((nextState, action, 1)) # cost = 1
+
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
