@@ -72,6 +72,8 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -97,56 +99,58 @@ def depthFirstSearch(problem):
     actions = []
     cost = 0
     frontier = util.Stack()
-    frontier.push(node, actions)
+    frontier.push((node, actions))
 
     explored = util.Stack()
     while not frontier.isEmpty():
         node, actions = frontier.pop()          # current node is the top node on frontier stack.
-
-        if problem.isGoalState(node):
-            break
+        if problem.isGoalState(node): return actions
+       
 
         if node not in explored.list and node not in frontier.list:
             explored.push(node)                # put node in explored
 
+            # Expand current node
             for succNode, action, cost in problem.getSuccessors(node):
 
                 if succNode not in explored.list:
                     actions_to_node = actions + [action]
-                    a = (succNode, actions_to_node)
-                    frontier.push(a)
+                    frontier.push((succNode, actions_to_node))
     
-    return actions
-
+    return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     
     frontier = util.Queue() # Frontier data structure initialised ot be Queue.
-    explored = []           # Initialize explored data structure. 
+    explored = util.Stack()           # Initialize explored data structure. 
     actions = []
     cost = 0
 
-    node = problem.getStartState()    # Get problem start state
-    if problem.isGoalState(node): return actions # If start state = goal state, return no actions.
+    state = problem.getStartState()    # Get problem start state
+    if problem.isGoalState(state): return actions # If start state = goal state, return no actions.
 
-    frontier.push((node, actions, cost))    # Initialize frontier with startState
+    frontier.push((state, actions, cost))    # Initialize frontier with startState
 
     while not frontier.isEmpty():
-        currentNode, actions, cost = frontier.pop() # Pop first state in frontier.
-        if problem.isGoalState(currentNode): return actions  # If current state = goal state then return accumulated actions.
-        explored.append(currentNode)                # Append state in explored.
+        currentState, actions, cost = frontier.pop() # Pop first state in frontier.
 
-        for succNode, succAct, succCost in problem.getSuccessors(currentNode):  # Check successors from currentNode.
-            if succNode in explored:
-                continue
-            accuAction = actions + [succAct]    # Accumulate actions.
-            accuCost = cost + succCost          # Accumulate cost.
-            frontier.push((succNode, accuAction, accuCost)) # Store state with their accumulated actions and cost.
+        
+        if problem.isGoalState(currentState): return actions     # If current state = goal state then return accumulated actions.
+        
+
+        if currentState not in explored.list and currentState not in frontier.list:   #! Less nodes are expanded!!
+            explored.push(currentState)                # Append state in explored.
+
+            # Expand current node.
+            for succState, succAct, succCost in problem.getSuccessors(currentState):  # Check successors from currentNode.
+                if succState not in explored.list:
+                    accuAction = actions + [succAct]    # Accumulate actions.
+                    accuCost = cost + succCost          # Accumulate cost.
+                    frontier.push((succState, accuAction, accuCost)) # Store state with their accumulated actions and cost.
 
     return []   # Goal state not found.
-
 
 
 
@@ -164,26 +168,24 @@ def uniformCostSearch(problem):
     cost = 0
     frontier.update((node, actions, cost), cost)
 
-    explored = []
+    explored = util.Stack()
     while not frontier.isEmpty():
         
-        currentNode, actions, cost = frontier.pop()
+        currentNode, actions, costs = frontier.pop()
         if problem.isGoalState(currentNode): return actions     # Goal state checked when node is selected for expansion.
-        explored.append(currentNode)
+        
+        if currentNode not in explored.list and currentNode not in frontier.heap:
+            explored.push(currentNode)
 
-        for succNode, succAction, succCost in problem.getSuccessors(currentNode):
-            if succNode in explored:
-                continue
-
-            accuAction = actions + [succAction]
-            accuCost = cost + succCost
-            frontier.update((succNode, accuAction, accuCost), accuCost)
+            for succNode, succAction, succCost in problem.getSuccessors(currentNode):
+                if succNode not in explored.list:
+                    accuAction = actions + [succAction]
+                    accuCost = costs + succCost
+                    frontier.update((succNode, accuAction, accuCost), accuCost)
 
     
     return [] # Goal state not found.
         
-
-
 
 
 def nullHeuristic(state, problem=None):
@@ -207,20 +209,22 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     eval = 0
     frontier.push((node, actions, costs), eval)
 
-    explored = []
+    explored = util.Stack()
     while not frontier.isEmpty():
+        #print "#Frontier: ", frontier.heap
         currentNode, actions, costs = frontier.pop()
         if problem.isGoalState(currentNode): return actions
-        explored.append(currentNode)
 
-        for succNode, succAction, succCost in problem.getSuccessors(currentNode):
-            if succNode in explored:
-                continue
+        if currentNode not in explored.list and currentNode not in frontier.heap:
+            explored.push(currentNode)
 
-            accuActions = actions + [succAction]
-            accuCosts = costs + succCost
-            eval = accuCosts + heuristic(succNode, problem)
-            frontier.update((succNode, accuActions, accuCosts), eval)
+            for succNode, succAction, succCost in problem.getSuccessors(currentNode):
+                if succNode not in explored.list:
+                    accuActions = actions + [succAction]
+                    accuCosts = costs + succCost
+                    eval = accuCosts + heuristic(succNode, problem)
+
+                    frontier.update((succNode, accuActions, accuCosts), eval)
 
     return [] # Return no actions as goal state is not found.
 
