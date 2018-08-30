@@ -2,6 +2,10 @@
   "ExpandedNodes": [
     ""
   ],
+<<<<<<< HEAD
   "SelectedNode": "\\pacman.py",
+=======
+  "SelectedNode": "\\searchAgents.py",
+>>>>>>> changeProblem_Corners
   "PreviewInSolutionExplorer": false
 }
