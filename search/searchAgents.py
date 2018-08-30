@@ -295,7 +295,6 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        #util.raiseNotDefined()
         currentCorners = list()
         return (self.startingPosition, currentCorners)
 
@@ -304,7 +303,6 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        #util.raiseNotDefined()
 
         currentState, currentCorners = state
         
@@ -382,55 +380,53 @@ def cornersHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
 
     succNode, currentCorners = state     # Unpack state elements.
+    if (len(currentCorners) == len(corners)):
+        return 0 # Default to trivial solution
 
-    hToCorners = list()
-    # Compute the manhattan distance to all goals from current node.
+    # Heuristic = Distance for furthest corner + closest corner.                                    ~ 2622 nodes expanded.
+    # Heuristic = Distance for furthest corner.                                                     ~ 2965 nodes expanded.
+    # Heuristic = Closest corner + distance from that corner to the furthest corner.                ~ 2335 nodes expanded.
+    # Heuristic = check visitedCorners, if 0 then 2x + y, 1 then x + y, 2 then x, 3 then minDist.   ~ 1718 nodes expanded.
+    # Heuristic = check visitedCorners, same as above but add minDist to 0, 1 and 2.                ~ 1268 nodes expanded.
+
+    ###############
+    import sys
+    x = util.manhattanDistance(corners[0], corners[1])
+    y = util.manhattanDistance(corners[2], corners[3])
+    shortSide = x
+    longSide = y
+    if x > y:
+        shortSide = y
+        longSide = x
+    
+    minDist = sys.maxsize
+    minCorner = tuple()
     for corner in corners:
         if corner not in currentCorners:
-            # Heuristic value = manhattan distance to closest goal.
-            mDist = abs(succNode[0] - corner[0]) + abs(succNode[1] - corner[1])
-            # Improving h: including the walls...
-            region = False                                                      # Determine relevant region for walls.
-            if corner[0] > succNode[0] and corner[1] > succNode[1]:
-                region = walls[succNode[0]:corner[0]][succNode[1]:corner[1]]
-            elif corner[0] > succNode[0] and corner[1] < succNode[1]:
-                region = walls[succNode[0]:corner[0]][corner[1]:succNode[1]]
-            elif corner[0] < succNode[0] and corner[1] > succNode[1]:
-                region = walls[corner[0]:succNode[0]][succNode[1]:corner[1]]
-            elif corner[0] < succNode[0] and corner[1] < succNode[1]:
-                region = walls[corner[0]:succNode[0]][corner[1]:succNode[1]]
+            mDist = util.manhattanDistance(succNode, corner)
+            if mDist < minDist:
+                minDist = mDist
+                minCorner = corner
 
-            xWall = list()                                         # Get wall y-axis within X_goal & X_pacman
-            if region != False:
-                #print "region: ", region
-                for wall_x in region:
-                    #print "wall_x: ", wall_x
-                    #xWall_x = len([1 for x in wall_x if x not in xWall and x == True])
-                    xWall_x = list()
-                    for x in wall_x:
-                        if x not in xWall and x == True:
-                            xWall_x.append(x)
-                    xWall.append(xWall_x)
-            
-            #print "xWall: ", xWall
-            if len(xWall) > 0:
-                xWall = len(max(xWall))
-            else:
-                xWall = 0
 
-            if xWall > (abs(succNode[1] - corner[1])):
-                #print "succNode: ", succNode
-                #print "Prev mDist: ", mDist
-                mDist += 2*abs(xWall - (abs(succNode[1] - corner[1])))
-                #print "Updated mDist: ", mDist
 
-            hToCorners.append(mDist)
-    
-    if len(hToCorners) > 0: 
-        h = min(hToCorners)       # heuristic value = distance to nearest goal.
-        return h
+    visitedCorners = len(currentCorners)
+    if visitedCorners == 0:
+        h = 2*shortSide + longSide + minDist
+    elif visitedCorners == 1:
+        h = shortSide + longSide + minDist
+    elif visitedCorners == 2:
+        h = shortSide + minDist
+    elif visitedCorners == 3:
+        h = minDist
 
-    return 0 # Default to trivial solution
+
+
+
+    return h
+
+
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -524,7 +520,25 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    
+    # Heuristic = no. of food remaining. ~12517 nodes expanded.
+    # Heuristic = manhattan distance to the closest food. ~13898 nodes expanded.
+    # Heuristic = manhattan distance to the furthest food. ~9551 nodes expanded.
+
+    foodCoordinates = foodGrid.asList()
+
+    if len(foodCoordinates) == 0:
+        return 0
+
+    import sys
+    maxDist = 0
+    for food in foodCoordinates:
+        mDist = util.manhattanDistance(position, food)
+        if mDist > maxDist:
+            maxDist = mDist
+
+    h = maxDist
+    return h
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -555,7 +569,9 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = search.breadthFirstSearch(problem)
+        return actions
+
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -591,7 +607,12 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        foods = self.food.asList()
+        if (x, y) in foods:
+            foods.remove((x,y))
+            return True
+
+        return False
 
 def mazeDistance(point1, point2, gameState):
     """
